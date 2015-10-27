@@ -1,23 +1,33 @@
-if (Meteor.isClient) {
-  // counter starts at 0
-  Session.setDefault('counter', 0);
-
-  Template.hello.helpers({
-    counter: function () {
-      return Session.get('counter');
+if(Meteor.isClient){
+  Template.leaderboard.helpers({
+    'player': function(){
+      return PlayersList.find({},{sort:{score: -1, name: 1}})
+    },
+    'selectedClass': function(){
+      var playerId = this._id;
+      var selectedPlayer = Session.get('selectedPlayer');
+      if(playerId == selectedPlayer){
+        return "selected"
+      }
     }
   });
-
-  Template.hello.events({
-    'click button': function () {
-      // increment the counter when button is clicked
-      Session.set('counter', Session.get('counter') + 1);
+  Template.leaderboard.events({
+    'click .player': function(){
+      var playerId = this._id;
+      Session.set('selectedPlayer', playerId);
+    },
+    'click .increment': function(){
+      var selectedPlayer = Session.get('selectedPlayer');
+      PlayersList.update(selectedPlayer, {$inc:{score: 5}});
+    },
+    'click .decrement': function(){
+      var selectedPlayer = Session.get('selectedPlayer');
+      PlayersList.update(selectedPlayer, {$inc: {score: -5} });
     }
   });
 }
+// stopped at Individual Documents under Database, Part 2
+if(Meteor.isServer){
 
-if (Meteor.isServer) {
-  Meteor.startup(function () {
-    // code to run on server at startup
-  });
 }
+PlayersList = new Mongo.Collection('players');
